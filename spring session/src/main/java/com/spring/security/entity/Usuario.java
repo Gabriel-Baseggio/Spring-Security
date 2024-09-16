@@ -1,13 +1,14 @@
 package com.spring.security.entity;
 
 import com.spring.security.enums.Perfil;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -24,27 +25,15 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    @NotBlank
-    private String nome;
-
-    @Column(unique = true, nullable = false)
-    @NotBlank
     private String usuario;
 
-    @Column(unique = true, nullable = false)
-    @NotBlank
-    private String email;
-
-    @Column(nullable = false)
-    @NotBlank
     private String senha;
 
     private Perfil perfil;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<Perfil> perfis = new ArrayList<>();
+        ArrayList<Perfil> perfis = new ArrayList<>();
         perfis.add(Perfil.USUARIO);
 
         if (this.perfil != Perfil.USUARIO) {
@@ -52,7 +41,7 @@ public class Usuario implements UserDetails {
         }
 
         if (this.perfil == Perfil.ADMINISTRADOR) {
-            perfis.add(this.perfil);
+            perfis.add(Perfil.ADMINISTRADOR);
         }
 
         return perfis;
@@ -67,5 +56,4 @@ public class Usuario implements UserDetails {
     public String getUsername() {
         return this.usuario;
     }
-
 }

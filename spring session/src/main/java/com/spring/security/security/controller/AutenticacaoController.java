@@ -1,12 +1,10 @@
 package com.spring.security.security.controller;
 
 import com.spring.security.entity.Usuario;
-import com.spring.security.enums.Perfil;
 import com.spring.security.security.controller.dto.LoginDTO;
 import com.spring.security.security.service.AutenticacaoService;
-import com.spring.security.security.utils.CookieUtils;
-import com.spring.security.security.utils.JwtUtils;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -17,39 +15,39 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.DeferredSecurityContext;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
 
 @RestController
-@RequestMapping("/api/auth")
 @AllArgsConstructor
-@CrossOrigin("*")
+@RequestMapping("/api/auth")
 public class AutenticacaoController {
 
     private AuthenticationProvider authenticationProvider;
 
-    private JwtUtils jwtUtils;
+    private SecurityContextRepository securityContextRepository;
 
-    private CookieUtils cookieUtils;
-
-    private AutenticacaoService service;
+    private AutenticacaoService autenticacaoService;
 
     @PreAuthorize("permitAll()")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO, HttpServletRequest req, HttpServletResponse res) {
         Authentication auth = new UsernamePasswordAuthenticationToken(loginDTO.usuario(), loginDTO.senha());
-
         auth = authenticationProvider.authenticate(auth);
 
         if (auth.isAuthenticated()) {
-            Usuario usuario = (Usuario) auth.getPrincipal();
-
-            String jwt = jwtUtils.criarToken(usuario);
-
-            Cookie cookieJwt = cookieUtils.criarCookie(jwt);
-
-            response.addCookie(cookieJwt);
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(auth);
+            securityContextRepository.saveContext(context, req, res);
         }
 
         return new ResponseEntity<>(auth.getPrincipal(), HttpStatus.OK);
@@ -57,8 +55,8 @@ public class AutenticacaoController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        service.logout(response);
+    public ResponseEntity<?> logout(HttpServletRequest req, HttpServletResponse res) {
+        autenticacaoService.logout(securityContextRepository, req, res);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -2,9 +2,9 @@ package com.spring.security.controller;
 
 import com.spring.security.entity.Usuario;
 import com.spring.security.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/usuarios")
 @AllArgsConstructor
+@RequestMapping("/api/usuarios")
 public class UsuarioController {
 
     private UsuarioService service;
@@ -72,9 +72,10 @@ public class UsuarioController {
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping
-    public ResponseEntity<?> excluirUsuario(@AuthenticationPrincipal Usuario usuario, HttpServletResponse response) {
+    public ResponseEntity<?> excluirUsuario(@AuthenticationPrincipal Usuario usuario, HttpServletRequest req,
+                                            HttpServletResponse res) {
         try {
-            service.excluirUsuario(usuario, response);
+            service.excluirUsuario(usuario, req, res);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

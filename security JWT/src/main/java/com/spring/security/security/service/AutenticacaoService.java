@@ -2,6 +2,9 @@ package com.spring.security.security.service;
 
 import com.spring.security.entity.Usuario;
 import com.spring.security.repository.UsuarioRepository;
+import com.spring.security.security.utils.CookieUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,29 +13,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-/**
- * Service de autenticação
- *
- * Necessariamente precisa da implementação de UserDetailsService
- * para que o Spring Security possa fazer a utilização dessa
- * service para a busca de usuário para autenticação
- */
 @Service
 @AllArgsConstructor
 public class AutenticacaoService implements UserDetailsService {
 
     private UsuarioRepository repository;
 
-    /**
-     * Método de busca de usuário por nome de usuário ou email
-     *
-     * Obrigatoriamente deve implementar esse método para o Spring Security
-     * possa utilizar
-     *
-     * @param username nome de usuário ou email
-     * @return usuário
-     * @throws UsernameNotFoundException
-     */
+    private CookieUtils cookieUtils;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Usuario> usuario = buscarPorEmail(username);
@@ -53,11 +41,11 @@ public class AutenticacaoService implements UserDetailsService {
     }
 
     private Optional<Usuario> buscarPorEmail(String email) {
-        if (!email.contains("@")) {
-            return Optional.empty();
-        }
-
         return repository.findByEmail(email);
     }
 
+    public void logout(HttpServletResponse response) {
+        Cookie cookie = cookieUtils.removerCookie();
+        response.addCookie(cookie);
+    }
 }

@@ -29,43 +29,15 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    /**
-     * Bean para a repository de autenticação
-     *
-     * Instância de HttpSessionSecurityContextRepository
-     */
-    @Bean
-    public SecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
-    }
-
-    /**
-     * Bean de filterChain definindo métodos necessários no filtro
-     *
-     * Precisa de um HttpSecurity
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity config) throws Exception {
         config
-                // Define a repository com os contextos de autenticação
-                // .securityContext(c -> securityContextRepository())
-                // Desativa a tela de formulário padrão na request de login so Security
                 .formLogin(AbstractHttpConfigurer::disable)
-                // Desativa a tela de logout padrão do Security
                 .logout(AbstractHttpConfigurer::disable)
-                // Desativa o Cross Site Request Forgery
                 .csrf(AbstractHttpConfigurer::disable)
-                // Define a configuração de sessões como stateless (JWT)
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(c -> c.configurationSource(corsConfigurationSource()));
-                // Define as autorizações para cada request
-//                .authorizeHttpRequests(http -> {
-//                    http
-//                            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-//                            .requestMatchers(HttpMethod.GET, "/auth/user").hasAuthority(Perfil.ADMIN.getAuthority())
-//                            .anyRequest().authenticated();
-//                });
         return config.build();
     }
 
@@ -81,12 +53,6 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * Bean para o provedor de autenticação
-     *
-     * Instância de DaoAuthenticationProvider, setando a service de autenticação criada por nós e
-     * o encoder de senha
-     */
     @Bean
     public AuthenticationProvider authenticationProvider(AutenticacaoService autenticacaoService) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
@@ -94,19 +60,6 @@ public class SecurityConfig {
         authenticationProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
         return authenticationProvider;
     }
-
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return NoOpPasswordEncoder.getInstance();
-//        return new BCryptPasswordEncoder();
-//    }
-
-//    @Bean
-//    public UserDetailsService authenticationService() {
-//        List<Usuario> usuarios = repository.findAll();
-//        List<UserDetails> userDetails = new ArrayList<>(usuarios);
-//        return new InMemoryUserDetailsManager(userDetails);
-//    }
 
 }
 

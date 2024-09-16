@@ -4,13 +4,12 @@ import com.spring.security.entity.Usuario;
 import com.spring.security.enums.Perfil;
 import com.spring.security.repository.UsuarioRepository;
 import com.spring.security.security.service.AutenticacaoService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +20,8 @@ public class UsuarioService {
     private UsuarioRepository repository;
 
     private AutenticacaoService autenticacaoService;
+
+    private SecurityContextRepository securityContextRepository;
 
     public Usuario criarUsuario(Usuario usuario) {
         if (usuario.getPerfil() == null) {
@@ -42,14 +43,6 @@ public class UsuarioService {
 
         if (usuarioEditado.getSenha() == null) {
             usuarioEditado.setSenha(usuario.getSenha());
-        }
-
-        if (usuarioEditado.getNome() == null) {
-            usuarioEditado.setNome(usuario.getNome());
-        }
-
-        if (usuarioEditado.getEmail() == null) {
-            usuarioEditado.setEmail(usuario.getEmail());
         }
 
         return salvarUsuario(usuarioEditado);
@@ -85,8 +78,9 @@ public class UsuarioService {
         return salvarUsuario(usuario);
     }
 
-    public void excluirUsuario(Usuario usuario, HttpServletResponse response) throws Exception {
-        autenticacaoService.logout(response);
+    public void excluirUsuario(Usuario usuario, HttpServletRequest req, HttpServletResponse res) throws Exception {
+        autenticacaoService.logout(securityContextRepository, req, res);
         repository.delete(usuario);
     }
+
 }

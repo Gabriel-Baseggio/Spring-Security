@@ -17,10 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @AllArgsConstructor
@@ -48,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                     securityContext.setAuthentication(authentication);
                     SecurityContextHolder.setContext(securityContext);
-                    if (!uri.equals("/auth/logout")) {
+                    if (!uri.equals("/api/auth/logout")) {
                         String novoToken = jwtUtils.criarToken((Usuario) authentication.getPrincipal());
                         cookie = cookieUtils.criarCookie(novoToken);
                         response.addCookie(cookie);
@@ -64,11 +61,18 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicEndpoint(String uri, String method) {
+        List<Map<String, String>> publicEndpoints = List.of(
+                Map.of("/api/auth/login", "POST"),
+                Map.of("/api/usuarios", "GET")
+        );
 
-        Map<String, String> loginEndpoint = Map.of("/api/auth/login", "POST");
-        Map<String, String> getAllEndpoint = Map.of("/api/usuarios", "GET");
+        for (Map<String, String> endpoint : publicEndpoints) {
+            if (endpoint.get(uri) != null && endpoint.get(uri).equals(method)) {
+                return true;
+            }
+        }
 
-        return uri.equals("/auth/login") && method.equals("POST");
+        return false;
     }
 
 }
