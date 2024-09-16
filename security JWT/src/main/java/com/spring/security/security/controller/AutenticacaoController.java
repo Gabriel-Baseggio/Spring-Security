@@ -44,11 +44,8 @@ public class AutenticacaoController {
 
         if (auth.isAuthenticated()) {
             Usuario usuario = (Usuario) auth.getPrincipal();
-
             String jwt = jwtUtils.criarToken(usuario);
-
             Cookie cookieJwt = cookieUtils.criarCookie(jwt);
-
             response.addCookie(cookieJwt);
         }
 

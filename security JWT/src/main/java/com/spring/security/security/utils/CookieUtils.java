@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 public class CookieUtils {
 
     public Cookie criarCookie(String jwt) {
-        Cookie cookie = cookieDefault("USERTOKEN", jwt);
-        cookie.setMaxAge(3600);
-        return cookie;
+        return cookieDefault("USERTOKEN", jwt);
     }
 
     public Cookie removerCookie() {
-        return cookieDefault("USERTOKEN", "");
+        Cookie cookie = cookieDefault("USERTOKEN", "");
+        cookie.setMaxAge(0);
+        return cookie;
     }
 
     private static Cookie cookieDefault(String name, String value) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setMaxAge(0);
+        cookie.setMaxAge(3600);
         cookie.setPath("/");
         cookie.setSecure(false);
         cookie.setHttpOnly(true);
