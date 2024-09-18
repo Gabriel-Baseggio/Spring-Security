@@ -51,7 +51,7 @@ public class Usuario implements UserDetails {
     /**
      * Utilizado para retornar as formas de autoridade do usuário
      *
-     * Obrigatoriamente deve implementar esse método para o Spring Security
+     * Obrigatoriamente deve implementar esse método para que o Spring Security
      * possa utilizar
      *
      * @return autoridades
@@ -74,7 +74,7 @@ public class Usuario implements UserDetails {
     /**
      * Utilizado para retornar a senha do usuário
      *
-     * Obrigatoriamente deve implementar esse método para o Spring Security
+     * Obrigatoriamente deve implementar esse método para que o Spring Security
      * possa utilizar
      *
      * @return senha
@@ -87,7 +87,7 @@ public class Usuario implements UserDetails {
     /**
      * Utilizado para retornar o usuário usado para autenticação (e.g. email)
      *
-     * Obrigatoriamente deve implementar esse método para o Spring Security
+     * Obrigatoriamente deve implementar esse método para que o Spring Security
      * possa utilizar
      *
      * @return usuario

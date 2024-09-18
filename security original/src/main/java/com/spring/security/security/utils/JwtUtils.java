@@ -8,12 +8,10 @@ import com.spring.security.entity.Usuario;
 import com.spring.security.security.service.AutenticacaoService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -41,20 +39,20 @@ public class JwtUtils {
                 .withSubject(usuario.getUsuario())
                 .withExpiresAt(instanteExpiracao)
                 .withArrayClaim("authorities", authorities)
-                .sign(getAlgorithm());
+                .sign(algorithm());
 
         return jwt;
     }
 
     public Authentication validarToken(String token) {
-        JWTVerifier verificador = JWT.require(getAlgorithm()).build();
+        JWTVerifier verificador = JWT.require(algorithm()).build();
         DecodedJWT tokenVerificado = verificador.verify(token);
         String username = tokenVerificado.getSubject();
         Usuario usuario = (Usuario) autenticacaoService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(usuario, usuario.getPassword(), usuario.getAuthorities());
     }
 
-    public Algorithm getAlgorithm() {
+    public Algorithm algorithm() {
         return Algorithm.HMAC256(senha);
     }
 

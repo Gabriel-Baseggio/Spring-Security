@@ -68,11 +68,8 @@ public class AutenticacaoController {
         // salva a sessão de login do usuário
         if (auth.isAuthenticated()) {
             Usuario usuario = (Usuario) auth.getPrincipal();
-
             String jwt = jwtUtils.criarToken(usuario);
-
             Cookie cookieJwt = cookieUtils.criarCookie(jwt);
-
             response.addCookie(cookieJwt);
 
             // Cria um contexto de segurança vazio

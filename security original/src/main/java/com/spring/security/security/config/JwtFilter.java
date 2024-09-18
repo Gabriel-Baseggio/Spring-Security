@@ -9,7 +9,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,16 +39,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 Optional<Cookie> cookieOptional = Arrays.stream(cookies)
                         .filter(cookie -> cookie.getName().equals("USERTOKEN")).findFirst();
                 if (cookieOptional.isPresent()) {
-                    Cookie cookie = cookieOptional.get();
-                    String token = cookie.getValue();
+                    String token = cookieOptional.get().getValue();
                     Authentication authentication = jwtUtils.validarToken(token);
-                    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-                    securityContext.setAuthentication(authentication);
-                    SecurityContextHolder.setContext(securityContext);
+                    saveContext(authentication);
                     if (!uri.equals("/auth/logout")) {
-                        String novoToken = jwtUtils.criarToken((Usuario) authentication.getPrincipal());
-                        cookie = cookieUtils.criarCookie(novoToken);
-                        response.addCookie(cookie);
+                        revigorateToken(response, authentication);
                     }
                 }
             } catch (Exception e) {
@@ -59,6 +53,18 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void saveContext(Authentication authentication) {
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    private void revigorateToken(HttpServletResponse response, Authentication authentication) {
+        String novoToken = jwtUtils.criarToken((Usuario) authentication.getPrincipal());
+        Cookie cookie = cookieUtils.criarCookie(novoToken);
+        response.addCookie(cookie);
     }
 
     private boolean isPublicEndpoint(String uri, String method) {

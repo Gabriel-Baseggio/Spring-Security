@@ -53,13 +53,16 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 // Desativa a tela de logout padrão do Security
                 .logout(AbstractHttpConfigurer::disable)
-                // Desativa o Cross Site Request Forgery
+                // Desativa a proteção contra Cross Site Request Forgery
                 .csrf(AbstractHttpConfigurer::disable)
+                // Configuração de cors para aceitar requests determinadas
+                .cors(c -> c.configurationSource(corsConfigurationSource()))
+                // Configs JWT
                 // Define a configuração de sessões como stateless (JWT)
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(c -> c.configurationSource(corsConfigurationSource()));
-        // Define as autorizações para cada request
+                // Filtor de requests customizado para JWT
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                // Define as autorizações para cada request
 //                .authorizeHttpRequests(http -> {
 //                    http
 //                            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
